@@ -7,4 +7,5 @@ script = ExtResource("1_e3464")
 item_name = "Vape"
 stat_delta = 15.0
 cooldown_seconds = 1.5
+is_hold_based = true
 metadata/_custom_type_script = "uid://xp87d1tmlwad"

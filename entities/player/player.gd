@@ -60,6 +60,12 @@ var is_sprinting: bool = false
 var is_exhausted: bool = false
 var is_crouching: bool = false
 
+# Состояния последствий потребностей (Consequences)
+var is_starving: bool = false
+var is_depressed: bool = false
+var is_bladder_critical: bool = false
+var _bladder_tremor_timer: float = 0.0
+
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -82,7 +88,19 @@ func _ready() -> void:
 		ceiling_check.add_exception(self)
 
 	_init_hud()
-	
+
+	var actions: PlayerActions = get_node_or_null("PlayerActions")
+	if actions and actions.has_signal("player_coughed"):
+		actions.player_coughed.connect(_on_player_coughed)
+
+
+func _on_player_coughed() -> void:
+	if not camera_pivot:
+		return
+	var cough_tween: Tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var original_pitch: float = camera_pivot.rotation.x
+	cough_tween.tween_property(camera_pivot, "rotation:x", original_pitch - deg_to_rad(6.0), 0.08)
+	cough_tween.tween_property(camera_pivot, "rotation:x", original_pitch, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _init_hud() -> void:
@@ -122,6 +140,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_update_need_consequences(delta)
 	_apply_gravity(delta)
 	_handle_crouch(delta)
 	_handle_stamina(delta)
@@ -131,6 +150,53 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 	_check_interaction_target()
+
+
+func _update_need_consequences(delta: float) -> void:
+	if not needs_manager:
+		return
+
+	var hunger: float = needs_manager.get_need_value("hunger")
+	var dopamine: float = needs_manager.get_need_value("dopamine")
+	var bladder: float = needs_manager.get_need_value("bladder")
+
+	# 1. Голод: активируется при 0.0, проходит при восстановлении до 15.0
+	if hunger <= 0.0:
+		is_starving = true
+	elif hunger >= 15.0:
+		is_starving = false
+
+	# 2. Апатия/депрессия: активируется при 0.0, проходит при 15.0
+	if dopamine <= 0.0:
+		is_depressed = true
+	elif dopamine >= 15.0:
+		is_depressed = false
+
+	# 3. Мочевой пузырь: предупреждение при >=90%, недержание при 100%
+	var max_bladder: float = 100.0
+	var bladder_res: NeedResource = needs_manager._get_resource_by_id("bladder")
+	if bladder_res:
+		max_bladder = bladder_res.max_value
+
+	is_bladder_critical = bladder >= (max_bladder * 0.9)
+
+	# Недержание: автоматическое вынужденное мочеиспускание
+	if bladder >= max_bladder:
+		var actions: PlayerActions = get_node_or_null("PlayerActions")
+		if actions and not actions.is_forced_pissing:
+			actions.trigger_involuntary_urination()
+
+	# Дрожь камеры при переполненном пузыре
+	if is_bladder_critical and camera_pivot:
+		_bladder_tremor_timer += delta * 20.0
+		var tremor_strength: float = 0.003 * clampf((bladder - (max_bladder * 0.9)) / (max_bladder * 0.1), 0.0, 1.0)
+		camera_pivot.rotation.z = sin(_bladder_tremor_timer) * tremor_strength
+	elif camera_pivot:
+		camera_pivot.rotation.z = move_toward(camera_pivot.rotation.z, 0.0, delta * 2.0)
+
+	# Передача состояний в HUD
+	if current_hud and current_hud.has_method("update_consequences"):
+		current_hud.update_consequences(delta, is_starving, is_depressed, bladder, max_bladder)
 
 func _handle_headbob(delta: float) -> void:
 	if not camera:
@@ -204,7 +270,7 @@ func _handle_stamina(delta: float) -> void:
 	
 	if is_sprinting and horizontal_speed > 0.5:
 		current_stamina = maxf(0.0, current_stamina - stamina_drain_rate * delta)
-		_regen_timer = regen_delay_time
+		_regen_timer = regen_delay_time * (2.0 if is_starving else 1.0)
 		if current_stamina <= 0.0 and not is_exhausted:
 			is_sprinting = false
 			is_exhausted = true
@@ -215,6 +281,8 @@ func _handle_stamina(delta: float) -> void:
 			_regen_timer -= delta
 		else:
 			var current_regen_rate: float = exhausted_regen_rate if is_exhausted else stamina_regen_rate
+			if is_starving:
+				current_regen_rate *= 0.5
 			current_stamina = minf(max_stamina, current_stamina + current_regen_rate * delta)
 			
 			if is_exhausted and current_stamina >= (max_stamina * exhausted_recovery_threshold):
@@ -229,10 +297,12 @@ func _handle_stamina(delta: float) -> void:
 func _handle_jump() -> void:
 	# Нельзя прыгать в приседе, при истощении или нехватке стамины
 	if Input.is_action_just_pressed("jump") and is_on_floor() and not is_crouching:
-		if not is_exhausted and current_stamina >= jump_stamina_cost:
-			velocity.y = jump_velocity
-			current_stamina -= jump_stamina_cost
-			_regen_timer = regen_delay_time
+		var effective_cost: float = jump_stamina_cost * (1.5 if is_starving else 1.0)
+		if not is_exhausted and current_stamina >= effective_cost:
+			var effective_jump_vel: float = jump_velocity * (0.65 if (is_starving or is_depressed) else 1.0)
+			velocity.y = effective_jump_vel
+			current_stamina -= effective_cost
+			_regen_timer = regen_delay_time * (2.0 if is_starving else 1.0)
 			if current_stamina <= 0.0 and not is_exhausted:
 				is_exhausted = true
 				if current_hud and current_hud.has_method("set_exhausted_vignette"):
@@ -247,14 +317,18 @@ func _handle_movement(delta: float) -> void:
 		"move_backward"
 	)
 
-	# В приседе спринт запрещен
+	# В приседе, при голодании или критическом мочевом пузыре (>=95%) спринт запрещен
+	var bladder_prevents_sprint: bool = false
+	if needs_manager:
+		bladder_prevents_sprint = needs_manager.get_need_value("bladder") >= 95.0
+
 	var wants_to_sprint: bool = Input.is_action_pressed("sprint") and input_dir.y < 0.0
-	if wants_to_sprint and not is_exhausted and not is_crouching and current_stamina > 0.0:
+	if wants_to_sprint and not is_exhausted and not is_crouching and not is_starving and not bladder_prevents_sprint and current_stamina > 0.0:
 		is_sprinting = true
 	else:
 		is_sprinting = false
 
-	# Расчёт целевой скорости с учётом приседания
+	# Расчёт целевой скорости с учётом приседания и последствий
 	var target_speed: float
 	if is_crouching:
 		target_speed = crouch_speed
@@ -264,15 +338,23 @@ func _handle_movement(delta: float) -> void:
 		target_speed = exhausted_walk_speed
 	else:
 		target_speed = walk_speed
+
+	# Штраф за голод: 35% снижение скорости
+	if is_starving:
+		target_speed *= 0.65
 	
 	var direction: Vector3 = (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
+	# Штраф за апатию (депрессию): вдвое сниженный разгон и торможение (вялость)
+	var current_accel: float = acceleration * (0.5 if is_depressed else 1.0)
+	var current_decel: float = deceleration * (0.5 if is_depressed else 1.0)
+
 	if direction != Vector3.ZERO:
-		velocity.x = move_toward(velocity.x, direction.x * target_speed, acceleration * delta)
-		velocity.z = move_toward(velocity.z, direction.z * target_speed, acceleration * delta)
+		velocity.x = move_toward(velocity.x, direction.x * target_speed, current_accel * delta)
+		velocity.z = move_toward(velocity.z, direction.z * target_speed, current_accel * delta)
 	else:
-		velocity.x = move_toward(velocity.x, 0.0, deceleration * delta)
-		velocity.z = move_toward(velocity.z, 0.0, deceleration * delta)
+		velocity.x = move_toward(velocity.x, 0.0, current_decel * delta)
+		velocity.z = move_toward(velocity.z, 0.0, current_decel * delta)
 
 
 func _handle_fov(delta: float) -> void:

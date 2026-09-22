@@ -12,6 +12,13 @@ bg_color = Color(0.13561365, 0.74940544, 0.66514224, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dwbse"]
 bg_color = Color(0.94509804, 0.76862746, 0.05882353, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_inhale_bg"]
+bg_color = Color(0.08, 0.08, 0.08, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xmadk"]
 shader = ExtResource("2_276te")
 shader_parameter/vignette_color = Color(0, 0, 0, 1)
@@ -110,6 +117,49 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 show_percentage = false
+
+[node name="InhaleBar" type="Control" parent="." unique_id=141852934]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 3
+anchor_left = 0.49100003
+anchor_top = 0.469
+anchor_right = 0.49100003
+anchor_bottom = 0.469
+offset_left = -100.72003
+offset_top = -5.5200195
+offset_right = 99.27997
+offset_bottom = 6.4799805
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Background" type="Panel" parent="InhaleBar" unique_id=141852935]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_inhale_bg")
+
+[node name="SweetSpot" type="ColorRect" parent="InhaleBar" unique_id=141852936]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 120.0
+offset_right = 160.0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.18, 0.85, 0.62, 0.55)
+
+[node name="ProgressFill" type="ColorRect" parent="InhaleBar" unique_id=141852937]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.95, 0.95, 0.95, 0.95)
 
 [node name="Vignette" type="ColorRect" parent="." unique_id=1342396270]
 material = SubResource("ShaderMaterial_xmadk")

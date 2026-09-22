@@ -58,8 +58,27 @@ func modify_need(id: String, amount: float) -> void:
 	if not res:
 		return
 
+	var old_val: float = values[id]
 	values[id] = clampf(values[id] + amount, 0.0, res.max_value)
-	need_changed.emit(id, values[id], res.max_value)
+	
+	if values[id] >= res.max_value and old_val < res.max_value:
+		need_filled.emit(id)
+	elif values[id] <= 0.0 and old_val > 0.0:
+		need_depleted.emit(id)
+
+	if not is_equal_approx(old_val, values[id]):
+		need_changed.emit(id, values[id], res.max_value)
+
+
+func get_need_value(id: String) -> float:
+	return values.get(id, 0.0)
+
+
+func get_need_percent(id: String) -> float:
+	var res: NeedResource = _get_resource_by_id(id)
+	if res and res.max_value > 0.0:
+		return values.get(id, 0.0) / res.max_value
+	return 0.0
 
 
 func _get_resource_by_id(id: String) -> NeedResource:
