@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://b5qxq43bbwhja"]
+
+[ext_resource type="Script" uid="uid://xp87d1tmlwad" path="res://resources/consumable.gd" id="1_e3464"]
+
+[resource]
+script = ExtResource("1_e3464")
+item_name = "Vape"
+stat_delta = 15.0
+cooldown_seconds = 1.5
+metadata/_custom_type_script = "uid://xp87d1tmlwad"

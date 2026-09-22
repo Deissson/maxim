@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b4c33q46mom0m"]
+
+[ext_resource type="Script" uid="uid://dbyllx5jh74jn" path="res://assets/door.gd" id="1_7g2qk"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gi07j"]
+size = Vector3(1.2, 2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fgqpd"]
+size = Vector3(1, 2, 0.08)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dckjl"]
+size = Vector3(1, 2, 0.08)
+
+[node name="Door" type="Area3D" unique_id=1113112447]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_7g2qk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1725392587]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_gi07j")
+
+[node name="Hinge" type="Node3D" parent="." unique_id=1734305778]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
+
+[node name="DoorMesh" type="MeshInstance3D" parent="Hinge" unique_id=2143914970]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, 0)
+mesh = SubResource("BoxMesh_fgqpd")
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Hinge/DoorMesh" unique_id=1137621222]
+size = Vector3(1, 2, 0.08)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Hinge" unique_id=1950494586]
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hinge/StaticBody3D" unique_id=327420034]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, 0)
+shape = SubResource("BoxShape3D_dckjl")

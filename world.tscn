@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://ceosooqp7cqme"]
+
+[ext_resource type="PackedScene" uid="uid://dyisrub8j5rg5" path="res://maxim.tscn" id="1_f3sb7"]
+[ext_resource type="PackedScene" uid="uid://3g3vlwe3e7xj" path="res://assets/pickup_item.tscn" id="1_fj7yv"]
+[ext_resource type="Resource" uid="uid://b5qxq43bbwhja" path="res://assets/data/vape.tres" id="2_tlwt5"]
+[ext_resource type="PackedScene" uid="uid://b4c33q46mom0m" path="res://assets/door.tscn" id="4_aqk2v"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_gi07j"]
+
+[sub_resource type="Sky" id="Sky_vqdit"]
+sky_material = SubResource("ProceduralSkyMaterial_gi07j")
+
+[sub_resource type="Environment" id="Environment_xmadk"]
+background_mode = 2
+sky = SubResource("Sky_vqdit")
+ambient_light_sky_contribution = 0.7
+tonemap_mode = 2
+sdfgi_enabled = true
+glow_enabled = true
+glow_intensity = 0.4
+glow_bloom = 0.1
+
+[sub_resource type="BoxMesh" id="BoxMesh_xmadk"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xmadk"]
+size = Vector3(30, 1, 30)
+
+[node name="World" type="Node3D" unique_id=825101384]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=187427204]
+environment = SubResource("Environment_xmadk")
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=188336865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1028947210]
+mesh = SubResource("BoxMesh_xmadk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1900180624]
+shape = SubResource("BoxShape3D_xmadk")
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Floor" unique_id=1558710393]
+size = Vector3(30, 1, 30)
+
+[node name="PickupItem" parent="." unique_id=1584280802 instance=ExtResource("1_fj7yv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.895833, 1.0080342, 0)
+item_data = ExtResource("2_tlwt5")
+
+[node name="Maxim" parent="." unique_id=818220461 instance=ExtResource("1_f3sb7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Door" parent="." unique_id=1299990984 instance=ExtResource("4_aqk2v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.558, 0, 0.088)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1417589965]
+transform = Transform3D(0.6059884, -0.47872788, 0.6352934, 0, 0.79863554, 0.601815, -0.7954735, -0.3646929, 0.48396385, 11.159917, 11.476808, 10.215117)
+shadow_enabled = true

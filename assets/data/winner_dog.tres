@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://mworqhcdtpve"]
+
+[ext_resource type="Script" uid="uid://xp87d1tmlwad" path="res://resources/consumable.gd" id="1_7a7g5"]
+
+[resource]
+script = ExtResource("1_7a7g5")
+item_name = "Hot-Dog"
+target_need = "hunger"
+stat_delta = 10.0
+is_single_use = true
+metadata/_custom_type_script = "uid://xp87d1tmlwad"

@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://dyisrub8j5rg5"]
+
+[ext_resource type="Script" uid="uid://crtrkhqwtdl2i" path="res://entities/player/player.gd" id="1_hqtel"]
+[ext_resource type="PackedScene" uid="uid://72xg3lve5sdt" path="res://ui/hud.tscn" id="2_sweqy"]
+[ext_resource type="Script" uid="uid://cqg126vdgvvja" path="res://entities/player/needs_manager.gd" id="3_2hs0m"]
+[ext_resource type="PackedScene" uid="uid://1f76rqha5bx" path="res://entities/player/piss_stream.tscn" id="3_b26j0"]
+[ext_resource type="Script" uid="uid://76b65o4wcuqf" path="res://systems/need_resource.gd" id="4_1jxqw"]
+[ext_resource type="PackedScene" uid="uid://crwgkpvuoeors" path="res://entities/player/smoke_cloud.tscn" id="4_413t2"]
+[ext_resource type="Script" uid="uid://vukgwmios45l" path="res://entities/player/player_actions.gd" id="6_n7ghd"]
+[ext_resource type="Script" uid="uid://xp87d1tmlwad" path="res://resources/consumable.gd" id="7_nvl01"]
+[ext_resource type="Resource" uid="uid://122s2sd2b141" path="res://assets/data/burger.tres" id="8_ivps1"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vqdit"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_xmadk"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="Resource" id="Resource_xmadk"]
+script = ExtResource("4_1jxqw")
+rate_per_second = 0.5
+metadata/_custom_type_script = "uid://76b65o4wcuqf"
+
+[sub_resource type="Resource" id="Resource_vqdit"]
+script = ExtResource("4_1jxqw")
+rate_per_second = 0.8
+metadata/_custom_type_script = "uid://76b65o4wcuqf"
+
+[sub_resource type="Resource" id="Resource_gi07j"]
+script = ExtResource("4_1jxqw")
+default_value = 50.0
+rate_per_second = 0.4
+fills_over_time = true
+metadata/_custom_type_script = "uid://76b65o4wcuqf"
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_xmadk"]
+radius = 0.3
+
+[node name="Maxim" type="CharacterBody3D" unique_id=818220461]
+collision_layer = 2
+script = ExtResource("1_hqtel")
+hud_scene = ExtResource("2_sweqy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1647267143]
+shape = SubResource("CapsuleShape3D_vqdit")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1803590494]
+mesh = SubResource("CapsuleMesh_xmadk")
+
+[node name="CameraPivot" type="Node3D" parent="." unique_id=1584725542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+
+[node name="InteractionRay" type="RayCast3D" parent="CameraPivot" unique_id=1908469178]
+target_position = Vector3(0, 0, -2.5)
+collision_mask = 4
+collide_with_areas = true
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=272157319]
+
+[node name="PissStream" parent="CameraPivot" unique_id=501249601 instance=ExtResource("3_b26j0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -0.4)
+
+[node name="ViewModelPivot" type="Node3D" parent="CameraPivot" unique_id=1747369446]
+
+[node name="SmokeSpawnPoint" type="Marker3D" parent="CameraPivot/ViewModelPivot" unique_id=586798628]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, -0.4)
+
+[node name="VapeMeshPivot" type="Node3D" parent="CameraPivot/ViewModelPivot" unique_id=258126764]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0.28, -0.45000005, -0.4)
+
+[node name="NeedsManager" type="Node" parent="." unique_id=1806990772]
+script = ExtResource("3_2hs0m")
+dopamine_data = SubResource("Resource_xmadk")
+hunger_data = SubResource("Resource_vqdit")
+bladder_data = SubResource("Resource_gi07j")
+metadata/_custom_type_script = "uid://cqg126vdgvvja"
+
+[node name="PlayerActions" type="Node" parent="." unique_id=202925726 node_paths=PackedStringArray("needs_manager", "piss_particles", "smoke_spawn_point")]
+script = ExtResource("6_n7ghd")
+needs_manager = NodePath("../NeedsManager")
+piss_particles = NodePath("../CameraPivot/PissStream")
+smoke_scene = ExtResource("4_413t2")
+smoke_spawn_point = NodePath("../CameraPivot/ViewModelPivot/SmokeSpawnPoint")
+starting_items = Array[ExtResource("7_nvl01")]([ExtResource("8_ivps1")])
+metadata/_custom_type_script = "uid://vukgwmios45l"
+
+[node name="CeilingCheck" type="ShapeCast3D" parent="." unique_id=1075662128]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("SphereShape3D_xmadk")
+target_position = Vector3(0, 0.8, 0)

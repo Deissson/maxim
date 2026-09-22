@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://1f76rqha5bx"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_xmadk"]
+direction = Vector3(0, 0, -1)
+spread = 2.0
+initial_velocity_min = 8.0
+initial_velocity_max = 9.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gi07j"]
+albedo_color = Color(0.95686275, 0.8156863, 0, 1)
+roughness = 0.1
+
+[sub_resource type="SphereMesh" id="SphereMesh_vqdit"]
+material = SubResource("StandardMaterial3D_gi07j")
+radius = 0.05
+height = 0.1
+
+[node name="PissStream" type="GPUParticles3D" unique_id=501249601]
+emitting = false
+amount = 120
+lifetime = 0.7
+process_material = SubResource("ParticleProcessMaterial_xmadk")
+draw_pass_1 = SubResource("SphereMesh_vqdit")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://caidu8t6k26nd"]
+
+[ext_resource type="Script" uid="uid://xp87d1tmlwad" path="res://resources/consumable.gd" id="1_pudnf"]
+
+[resource]
+script = ExtResource("1_pudnf")
+item_name = "Water"
+target_need = "bladder"
+is_single_use = true
+max_charges = 3
+metadata/_custom_type_script = "uid://xp87d1tmlwad"

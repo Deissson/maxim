@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://122s2sd2b141"]
+
+[ext_resource type="Script" uid="uid://xp87d1tmlwad" path="res://resources/consumable.gd" id="1_x5m4x"]
+
+[resource]
+script = ExtResource("1_x5m4x")
+item_name = "Burger"
+target_need = "hunger"
+stat_delta = 35.0
+cooldown_seconds = 2.0
+is_single_use = true
+metadata/_custom_type_script = "uid://xp87d1tmlwad"

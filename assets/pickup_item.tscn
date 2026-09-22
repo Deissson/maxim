@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://3g3vlwe3e7xj"]
+
+[ext_resource type="Script" uid="uid://ba60wrvvlr5uc" path="res://assets/pickup_item.gd" id="1_vl6xf"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_vqdit"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_xmadk"]
+
+[node name="PickupItem" type="Area3D" unique_id=1584280802]
+collision_layer = 4
+script = ExtResource("1_vl6xf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=578132035]
+shape = SubResource("SphereShape3D_vqdit")
+
+[node name="GPUParticlesCollisionSphere3D" type="GPUParticlesCollisionSphere3D" parent="CollisionShape3D" unique_id=1519358235]
+
+[node name="VisualRoot" type="Node3D" parent="CollisionShape3D" unique_id=1751991925]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D/VisualRoot" unique_id=1387101249]
+mesh = SubResource("SphereMesh_xmadk")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="CollisionShape3D/VisualRoot" unique_id=986993018]
+light_color = Color(0.8784314, 0.68235296, 0.3254902, 1)
+light_energy = 1.5
+omni_range = 2.5
